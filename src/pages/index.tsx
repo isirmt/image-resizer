@@ -17,7 +17,6 @@ function formatFileSize(sizeInBytes: number): string {
 export default function App() {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const [isDragging, setIsDragging] = React.useState<boolean>(false);
-  const [loadedFileSize, setLoadedFileSize] = React.useState<number | null>(null);
   const [loadedImgSize, setLoadedImgSize] = React.useState<{ width: number, height: number } | null>(null);
   const [loadedAspectRatio, setLoadedAspectRatio] = React.useState<number | null>(null);
   const [sliderValue, setSliderValue] = React.useState<number>(0);
@@ -57,7 +56,6 @@ export default function App() {
           };
           img.src = URL.createObjectURL(files[0]);
           setCurrentFile(files[0]);
-          setLoadedFileSize(files[0].size);
         }
         setIsDragging(false);
       }
@@ -117,9 +115,10 @@ export default function App() {
   return (
     <main className="w-full h-[100svh] flex flex-col select-none">
       <div className="h-16 px-4 bg-red-50 flex flex-col items-center justify-center">
-        <h1 className="text-center text-3xl text-red-400">
-          <b>画像リサイズ</b>
+        <h1 className="text-center leading-8 text-3xl text-red-400">
+          <b>画像の縮小化</b>
         </h1>
+        <p className="leading-4"><small>&copy; isirmt</small></p>
       </div>
       <div className="h-[calc(100svh_-_14rem)] flex flex-col justify-center items-center gap-y-3 relative w-full">
         <div
@@ -133,10 +132,10 @@ export default function App() {
       </div>
 
       <div className="h-40 px-4 bg-red-50 flex flex-col items-center justify-center">
-        {loadedFileSize && loadedImgSize && (
+        {loadedImgSize ? (
           <>
             <div className="flex gap-2 text-sm text-red-400">
-              <span><b>ファイルサイズ：{formatFileSize(loadedFileSize)}</b></span>
+              <span><b>ファイルサイズ：{formatFileSize(currentFile?.size!)}</b></span>
               <span><b>画像サイズ：[{loadedImgSize.width} x {loadedImgSize.height}]</b></span>
             </div>
             <div className="w-[80%]">
@@ -162,7 +161,7 @@ export default function App() {
               ダウンロード
             </button>
           </>
-        )}
+        ) : <></>}
       </div>
 
     </main>
