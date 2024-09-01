@@ -108,7 +108,7 @@ export default function App() {
     const canvas = canvasRef.current;
     if (canvas) {
       const link = document.createElement("a");
-      link.download = currentFile?.name + "_resized.png";
+      link.download = `${currentFile?.name}_(${sliderValue}x${Math.trunc(sliderValue / loadedAspectRatio!)})_resized.png`;
       link.href = canvas.toDataURL();
       link.click();
     }
@@ -116,52 +116,57 @@ export default function App() {
 
   return (
     <main className="w-full h-[100svh] flex flex-col select-none">
-      <div className="p-4 bg-red-50 flex flex-col items-center">
-        <h1 className="text-center text-3xl px-2 text-red-400">
+      <div className="h-16 px-4 bg-red-50 flex flex-col items-center justify-center">
+        <h1 className="text-center text-3xl text-red-400">
           <b>画像リサイズ</b>
         </h1>
       </div>
-      <div className=" flex flex-col justify-center items-center gap-y-3 relative w-full flex-1">
+      <div className="h-[calc(100svh_-_14rem)] flex flex-col justify-center items-center gap-y-3 relative w-full">
         <div
-          className={`w-full flex flex-col justify-center items-center p-6 rounded-lg border-red-400 border shadow shadow-red-300 mx-4 ${isDragging ? "bg-red-50" : ""}`}
+          className={`w-full h-full flex flex-col justify-center items-center p-6 border-red-400 border-y mx-4 ${isDragging ? "bg-red-50" : ""}`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={() => setIsDragging(false)}
         >
-          <canvas ref={canvasRef} width={500} height={500} className="max-w-full"></canvas>
+          <canvas ref={canvasRef} width={500} height={500} className=" max-w-full max-h-full"></canvas>
         </div>
       </div>
-      {loadedFileSize && loadedImgSize && (
-        <div className="p-4 bg-red-50 flex flex-col items-center">
-          <div className="flex gap-2 text-sm text-red-400">
-            <span><b>ファイルサイズ：{formatFileSize(loadedFileSize)}</b></span>
-            <span><b>画像サイズ：[{loadedImgSize.width} x {loadedImgSize.height}]</b></span>
-          </div>
-          <div className="w-[80%]">
-            <input
-              type="range"
-              min="1"
-              max={loadedImgSize.width}
-              value={sliderValue}
-              onChange={(e) => setSliderValue(Number(e.target.value))}
-              onMouseUp={handleResize}
-              className="w-full"
-            />
-          </div>
-          <div className="flex gap-2 text-sm text-red-400">
-            {resizedFileSize && <span><b>ファイルサイズ：{formatFileSize(resizedFileSize)}</b></span>}
-            <span><b>画像サイズ：[{sliderValue} x {Math.trunc(sliderValue / loadedAspectRatio!)}]</b></span>
-          </div>
-          <button
-            onClick={handleDownload}
-            className="mt-4 px-4 py-2 bg-red-400 text-white rounded-lg"
-          >
-            ダウンロード
-          </button>
-        </div>
-      )}
+
+      <div className="h-40 px-4 bg-red-50 flex flex-col items-center justify-center">
+        {loadedFileSize && loadedImgSize && (
+          <>
+            <div className="flex gap-2 text-sm text-red-400">
+              <span><b>ファイルサイズ：{formatFileSize(loadedFileSize)}</b></span>
+              <span><b>画像サイズ：[{loadedImgSize.width} x {loadedImgSize.height}]</b></span>
+            </div>
+            <div className="w-[80%]">
+              <input
+                type="range"
+                min="1"
+                max={loadedImgSize.width}
+                value={sliderValue}
+                onChange={(e) => setSliderValue(Number(e.target.value))}
+                onMouseUp={handleResize}
+                className="w-full"
+              />
+            </div>
+            <div className="flex gap-2 text-sm text-red-400">
+              {resizedFileSize && <span><b>ファイルサイズ：{formatFileSize(resizedFileSize)}</b></span>}
+              <span><b>画像サイズ：[{sliderValue} x {Math.trunc(sliderValue / loadedAspectRatio!)}]</b></span>
+            </div>
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="transition-colors mt-4 px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500"
+            >
+              ダウンロード
+            </button>
+          </>
+        )}
+      </div>
+
     </main>
   );
 }
 
-export const Head: HeadFC = () => <title>Home Page</title>;
+export const Head: HeadFC = () => <title>画像の縮小化</title>;
