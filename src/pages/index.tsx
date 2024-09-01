@@ -1,193 +1,167 @@
-import * as React from "react"
-import type { HeadFC, PageProps } from "gatsby"
+import * as React from "react";
+import type { HeadFC } from "gatsby";
 
-const pageStyles = {
-  color: "#232129",
-  padding: 96,
-  fontFamily: "-apple-system, Roboto, sans-serif, serif",
-}
-const headingStyles = {
-  marginTop: 0,
-  marginBottom: 64,
-  maxWidth: 320,
-}
-const headingAccentStyles = {
-  color: "#663399",
-}
-const paragraphStyles = {
-  marginBottom: 48,
-}
-const codeStyles = {
-  color: "#8A6534",
-  padding: 4,
-  backgroundColor: "#FFF4DB",
-  fontSize: "1.25rem",
-  borderRadius: 4,
-}
-const listStyles = {
-  marginBottom: 96,
-  paddingLeft: 0,
-}
-const doclistStyles = {
-  paddingLeft: 0,
-}
-const listItemStyles = {
-  fontWeight: 300,
-  fontSize: 24,
-  maxWidth: 560,
-  marginBottom: 30,
-}
+function formatFileSize(sizeInBytes: number): string {
+  const units = ["B", "kB", "MB", "GB", "TB"];
+  let size = sizeInBytes;
+  let unitIndex = 0;
 
-const linkStyle = {
-  color: "#8954A8",
-  fontWeight: "bold",
-  fontSize: 16,
-  verticalAlign: "5%",
-}
-
-const docLinkStyle = {
-  ...linkStyle,
-  listStyleType: "none",
-  display: `inline-block`,
-  marginBottom: 24,
-  marginRight: 12,
-}
-
-const descriptionStyle = {
-  color: "#232129",
-  fontSize: 14,
-  marginTop: 10,
-  marginBottom: 0,
-  lineHeight: 1.25,
-}
-
-const docLinks = [
-  {
-    text: "TypeScript Documentation",
-    url: "https://www.gatsbyjs.com/docs/how-to/custom-configuration/typescript/",
-    color: "#8954A8",
-  },
-  {
-    text: "GraphQL Typegen Documentation",
-    url: "https://www.gatsbyjs.com/docs/how-to/local-development/graphql-typegen/",
-    color: "#8954A8",
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
   }
-]
 
-const badgeStyle = {
-  color: "#fff",
-  backgroundColor: "#088413",
-  border: "1px solid #088413",
-  fontSize: 11,
-  fontWeight: "bold",
-  letterSpacing: 1,
-  borderRadius: 4,
-  padding: "4px 6px",
-  display: "inline-block",
-  position: "relative" as "relative",
-  top: -2,
-  marginLeft: 10,
-  lineHeight: 1,
+  return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
 
-const links = [
-  {
-    text: "Tutorial",
-    url: "https://www.gatsbyjs.com/docs/tutorial/getting-started/",
-    description:
-      "A great place to get started if you're new to web development. Designed to guide you through setting up your first Gatsby site.",
-    color: "#E95800",
-  },
-  {
-    text: "How to Guides",
-    url: "https://www.gatsbyjs.com/docs/how-to/",
-    description:
-      "Practical step-by-step guides to help you achieve a specific goal. Most useful when you're trying to get something done.",
-    color: "#1099A8",
-  },
-  {
-    text: "Reference Guides",
-    url: "https://www.gatsbyjs.com/docs/reference/",
-    description:
-      "Nitty-gritty technical descriptions of how Gatsby works. Most useful when you need detailed information about Gatsby's APIs.",
-    color: "#BC027F",
-  },
-  {
-    text: "Conceptual Guides",
-    url: "https://www.gatsbyjs.com/docs/conceptual/",
-    description:
-      "Big-picture explanations of higher-level Gatsby concepts. Most useful for building understanding of a particular topic.",
-    color: "#0D96F2",
-  },
-  {
-    text: "Plugin Library",
-    url: "https://www.gatsbyjs.com/plugins",
-    description:
-      "Add functionality and customize your Gatsby site or app with thousands of plugins built by our amazing developer community.",
-    color: "#8EB814",
-  },
-  {
-    text: "Build and Host",
-    url: "https://www.gatsbyjs.com/cloud",
-    badge: true,
-    description:
-      "Now you’re ready to show the world! Give your Gatsby site superpowers: Build and host on Gatsby Cloud. Get started for free!",
-    color: "#663399",
-  },
-]
+export default function App() {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [isDragging, setIsDragging] = React.useState<boolean>(false);
+  const [loadedFileSize, setLoadedFileSize] = React.useState<number | null>(null);
+  const [loadedImgSize, setLoadedImgSize] = React.useState<{ width: number, height: number } | null>(null);
+  const [loadedAspectRatio, setLoadedAspectRatio] = React.useState<number | null>(null);
+  const [sliderValue, setSliderValue] = React.useState<number>(0);
+  const [currentFile, setCurrentFile] = React.useState<File | null>(null);
+  const [resizedFileSize, setResizedFileSize] = React.useState<number | null>(null);
 
-const IndexPage: React.FC<PageProps> = () => {
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+          const img = new Image();
+          img.onload = () => {
+            const { width: imgWidth, height: imgHeight } = img;
+            setLoadedImgSize({ width: imgWidth, height: imgHeight });
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const aspectRatio = imgWidth / imgHeight;
+            setLoadedAspectRatio(aspectRatio);
+            const fileHeight = canvas.width / aspectRatio;
+
+            if (fileHeight > canvas.height) {
+              const drawHeight = canvas.height;
+              const drawWidth = canvas.height * aspectRatio;
+              ctx.drawImage(img, (canvas.width - drawWidth) / 2, 0, drawWidth, drawHeight);
+            } else {
+              const drawWidth = canvas.width;
+              const drawHeight = canvas.width / aspectRatio;
+              ctx.drawImage(img, 0, (canvas.height - drawHeight) / 2, drawWidth, drawHeight);
+            }
+
+            setSliderValue(imgWidth);
+          };
+          img.src = URL.createObjectURL(files[0]);
+          setCurrentFile(files[0]);
+          setLoadedFileSize(files[0].size);
+        }
+        setIsDragging(false);
+      }
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleResize = () => {
+    if (!currentFile || !loadedAspectRatio) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = sliderValue;
+        canvas.height = sliderValue / loadedAspectRatio;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const resizedImgData = canvas.toDataURL("image/png");
+
+        // Calculate the size of the resized image data URL
+        const base64Length = resizedImgData.length - (resizedImgData.indexOf(',') + 1);
+        const padding = (resizedImgData.endsWith('==')) ? 2 : (resizedImgData.endsWith('=')) ? 1 : 0;
+        const fileSizeInBytes = (base64Length * 0.75) - padding;
+
+        setResizedFileSize(fileSizeInBytes);
+
+        const mainCanvas = canvasRef.current;
+        if (mainCanvas) {
+          const mainCtx = mainCanvas.getContext("2d");
+          mainCanvas.width = sliderValue;
+          mainCanvas.height = sliderValue / loadedAspectRatio;
+          mainCtx?.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+          mainCtx?.drawImage(img, 0, 0, mainCanvas.width, mainCanvas.height);
+        }
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(currentFile);
+  };
+
+  const handleDownload = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const link = document.createElement("a");
+      link.download = currentFile?.name + "_resized.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+  };
+
   return (
-    <main style={pageStyles}>
-      <h1 style={headingStyles}>
-        Congratulations
-        <br />
-        <span style={headingAccentStyles}>— you just made a Gatsby site! 🎉🎉🎉</span>
-      </h1>
-      <p style={paragraphStyles}>
-        Edit <code style={codeStyles}>src/pages/index.tsx</code> to see this page
-        update in real-time. 😎
-      </p>
-      <ul style={doclistStyles}>
-        {docLinks.map(doc => (
-          <li key={doc.url} style={docLinkStyle}>
-            <a
-              style={linkStyle}
-              href={`${doc.url}?utm_source=starter&utm_medium=ts-docs&utm_campaign=minimal-starter-ts`}
-            >
-              {doc.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-      <ul style={listStyles}>
-        {links.map(link => (
-          <li key={link.url} style={{ ...listItemStyles, color: link.color }}>
-            <span>
-              <a
-                style={linkStyle}
-                href={`${link.url}?utm_source=starter&utm_medium=start-page&utm_campaign=minimal-starter-ts`}
-              >
-                {link.text}
-              </a>
-              {link.badge && (
-                <span style={badgeStyle} aria-label="New Badge">
-                  NEW!
-                </span>
-              )}
-              <p style={descriptionStyle}>{link.description}</p>
-            </span>
-          </li>
-        ))}
-      </ul>
-      <img
-        alt="Gatsby G Logo"
-        src="data:image/svg+xml,%3Csvg width='24' height='24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2a10 10 0 110 20 10 10 0 010-20zm0 2c-3.73 0-6.86 2.55-7.75 6L14 19.75c3.45-.89 6-4.02 6-7.75h-5.25v1.5h3.45a6.37 6.37 0 01-3.89 4.44L6.06 9.69C7 7.31 9.3 5.63 12 5.63c2.13 0 4 1.04 5.18 2.65l1.23-1.06A7.959 7.959 0 0012 4zm-8 8a8 8 0 008 8c.04 0 .09 0-8-8z' fill='%23639'/%3E%3C/svg%3E"
-      />
+    <main className="w-full h-[100svh] flex flex-col select-none">
+      <div className="p-4 bg-red-50 flex flex-col items-center">
+        <h1 className="text-center text-3xl px-2 text-red-400">
+          <b>画像リサイズ</b>
+        </h1>
+      </div>
+      <div className=" flex flex-col justify-center items-center gap-y-3 relative w-full flex-1">
+        <div
+          className={`w-full flex flex-col justify-center items-center p-6 rounded-lg border-red-400 border shadow shadow-red-300 mx-4 ${isDragging ? "bg-red-50" : ""}`}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={() => setIsDragging(false)}
+        >
+          <canvas ref={canvasRef} width={500} height={500} className="max-w-full"></canvas>
+        </div>
+      </div>
+      {loadedFileSize && loadedImgSize && (
+        <div className="p-4 bg-red-50 flex flex-col items-center">
+          <div className="flex gap-2 text-sm text-red-400">
+            <span><b>ファイルサイズ：{formatFileSize(loadedFileSize)}</b></span>
+            <span><b>画像サイズ：[{loadedImgSize.width} x {loadedImgSize.height}]</b></span>
+          </div>
+          <div className="w-[80%]">
+            <input
+              type="range"
+              min="1"
+              max={loadedImgSize.width}
+              value={sliderValue}
+              onChange={(e) => setSliderValue(Number(e.target.value))}
+              onMouseUp={handleResize}
+              className="w-full"
+            />
+          </div>
+          <div className="flex gap-2 text-sm text-red-400">
+            {resizedFileSize && <span><b>ファイルサイズ：{formatFileSize(resizedFileSize)}</b></span>}
+            <span><b>画像サイズ：[{sliderValue} x {Math.trunc(sliderValue / loadedAspectRatio!)}]</b></span>
+          </div>
+          <button
+            onClick={handleDownload}
+            className="mt-4 px-4 py-2 bg-red-400 text-white rounded-lg"
+          >
+            ダウンロード
+          </button>
+        </div>
+      )}
     </main>
-  )
+  );
 }
 
-export default IndexPage
-
-export const Head: HeadFC = () => <title>Home Page</title>
+export const Head: HeadFC = () => <title>Home Page</title>;
