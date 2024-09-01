@@ -23,13 +23,11 @@ export default function App() {
   const [currentFile, setCurrentFile] = React.useState<File | null>(null);
   const [resizedFileSize, setResizedFileSize] = React.useState<number | null>(null);
 
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
+  const loadImg = (files: FileList) => {
     const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        const files = event.dataTransfer.files;
         if (files.length > 0) {
           const img = new Image();
           img.onload = () => {
@@ -60,7 +58,18 @@ export default function App() {
         setIsDragging(false);
       }
     }
+  }
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    loadImg(event.dataTransfer.files);
   };
+
+  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.currentTarget.files;
+    if (!files || files?.length === 0) return;
+    loadImg(files)
+  }
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -120,21 +129,30 @@ export default function App() {
         </h1>
         <p className="leading-4"><small>&copy; isirmt</small></p>
       </div>
-      <div className="h-[calc(100svh_-_14rem)] flex flex-col justify-center items-center gap-y-3 relative w-full">
+      <div className="h-[calc(100svh_-_16rem)] flex flex-col justify-center items-center gap-y-3 relative w-full">
         <div
           className={`w-full h-full flex flex-col justify-center items-center p-6 border-red-400 border-y mx-4 ${isDragging ? "bg-red-50" : ""}`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={() => setIsDragging(false)}
         >
-          <canvas ref={canvasRef} width={500} height={500} className=" max-w-full max-h-full"></canvas>
+          <canvas ref={canvasRef} width={500} height={500} className={`max-w-full max-h-full ${!currentFile ? "hidden" : ""}`}></canvas>
+          {!currentFile
+            ? <>
+            <img src="/icon_transparent.png" alt="icon"></img>
+            </>
+            : <></>}
         </div>
       </div>
 
-      <div className="h-40 px-4 bg-red-50 flex flex-col items-center justify-center">
+      <div className="h-48 px-4 bg-red-50 flex flex-col items-center justify-center">
+        <input
+          onChange={handleInput}
+          type="file" accept="image/*" />
         {loadedImgSize ? (
           <>
             <div className="flex gap-2 text-sm text-red-400">
+              <span><b>前:</b></span>
               <span><b>ファイルサイズ：{formatFileSize(currentFile?.size!)}</b></span>
               <span><b>画像サイズ：[{loadedImgSize.width} x {loadedImgSize.height}]</b></span>
             </div>
@@ -150,6 +168,7 @@ export default function App() {
               />
             </div>
             <div className="flex gap-2 text-sm text-red-400">
+              <span><b>後:</b></span>
               {resizedFileSize && <span><b>ファイルサイズ：{formatFileSize(resizedFileSize)}</b></span>}
               <span><b>画像サイズ：[{sliderValue} x {Math.trunc(sliderValue / loadedAspectRatio!)}]</b></span>
             </div>
@@ -158,7 +177,7 @@ export default function App() {
               onClick={handleDownload}
               className="transition-colors mt-4 px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500"
             >
-              ダウンロード
+              <b>ダウンロード</b>
             </button>
           </>
         ) : <></>}
