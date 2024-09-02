@@ -140,6 +140,7 @@ export default function App() {
           {!currentFile
             ? <>
               <img className="max-w-full max-h-full" src="/back_transparent.png" alt="icon"></img>
+              <p className="text-red-400 text-center text-lg"><b>画像をドラッグ&ドロップ<br />または下より選択</b></p>
             </>
             : <></>}
         </div>
