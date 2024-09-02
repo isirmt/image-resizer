@@ -192,5 +192,13 @@ export const Head: HeadFC = () => {
     <title>画像の縮小化</title>
     <meta name="description" content="画像を特定のファイルサイズまで落とすために利用可能です。" />
     <meta name="keywords" content="image,resize" />
+    <meta property="og:url" content="https://img-sm.isirmt.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="画像の縮小化" />
+    <meta property="og:description" content="画像を特定のファイルサイズまで落とすために利用可能です。" />
+    <meta property="og:site_name" content="isirmt ミニアプリ" />
+    <meta property="og:image" content="https://img-sm.isirmt.com/ogp.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@isirmt" />
   </>
 };
