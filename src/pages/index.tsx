@@ -139,7 +139,7 @@ export default function App() {
           <canvas ref={canvasRef} width={500} height={500} className={`max-w-full max-h-full ${!currentFile ? "hidden" : ""}`}></canvas>
           {!currentFile
             ? <>
-            <img src="/icon_transparent.png" alt="icon"></img>
+              <img src="/back_transparent.png" alt="icon"></img>
             </>
             : <></>}
         </div>
@@ -187,4 +187,10 @@ export default function App() {
   );
 }
 
-export const Head: HeadFC = () => <title>画像の縮小化</title>;
+export const Head: HeadFC = () => {
+  return <>
+    <title>画像の縮小化</title>
+    <meta name="description" content="画像を特定のファイルサイズまで落とすために利用可能です。" />
+    <meta name="keywords" content="image,resize" />
+  </>
+};
