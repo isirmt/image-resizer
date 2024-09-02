@@ -1,45 +1,20 @@
 import * as React from "react"
 import { Link, HeadFC, PageProps } from "gatsby"
 
-const pageStyles = {
-  color: "#232129",
-  padding: "96px",
-  fontFamily: "-apple-system, Roboto, sans-serif, serif",
-}
-const headingStyles = {
-  marginTop: 0,
-  marginBottom: 64,
-  maxWidth: 320,
-}
-
-const paragraphStyles = {
-  marginBottom: 48,
-}
-const codeStyles = {
-  color: "#8A6534",
-  padding: 4,
-  backgroundColor: "#FFF4DB",
-  fontSize: "1.25rem",
-  borderRadius: 4,
-}
-
 const NotFoundPage: React.FC<PageProps> = () => {
   return (
-    <main style={pageStyles}>
-      <h1 style={headingStyles}>Page not found</h1>
-      <p style={paragraphStyles}>
-        Sorry 😔, we couldn’t find what you were looking for.
-        <br />
-        {process.env.NODE_ENV === "development" ? (
-          <>
-            <br />
-            Try creating a page in <code style={codeStyles}>src/pages/</code>.
-            <br />
-          </>
-        ) : null}
-        <br />
-        <Link to="/">Go home</Link>.
-      </p>
+    <main className="w-full h-[100svh] flex flex-col select-none">
+      <div className="h-16 px-4 bg-red-50 flex flex-col items-center justify-center">
+        <h1 className="text-center leading-8 text-3xl text-red-400">
+          <b>404 Not Found</b>
+        </h1>
+        <p className="leading-4"><small>&copy; isirmt</small></p>
+      </div>
+      <div className="h-[calc(100svh_-_16rem)] flex flex-col justify-center items-center gap-y-3 relative w-full">
+        <p>お探しのページは見つかりませんでした。</p>
+        <Link to="/" className="text-blue-700 underline">トップページへ</Link>
+      </div>
+      <div className="h-48 px-4 bg-red-50 flex flex-col items-center justify-center"></div>
     </main>
   )
 }
