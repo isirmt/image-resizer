@@ -139,7 +139,7 @@ export default function App() {
           <canvas ref={canvasRef} width={500} height={500} className={`max-w-full max-h-full ${!currentFile ? "hidden" : ""}`}></canvas>
           {!currentFile
             ? <>
-              <img src="/back_transparent.png" alt="icon"></img>
+              <img className="max-w-full max-h-full" src="/back_transparent.png" alt="icon"></img>
             </>
             : <></>}
         </div>
