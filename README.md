@@ -1,5 +1,7 @@
 # 画像の縮小化アプリケーション
 
+![thumbnail](https://img-sm.isirmt.com/ogp.png)
+
 画像を簡易的に縮小化できます．
 
 - 👍️: ファイルサイズを参照しつつ可能
