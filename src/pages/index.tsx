@@ -165,6 +165,7 @@ export default function App() {
                 value={sliderValue}
                 onChange={(e) => setSliderValue(Number(e.target.value))}
                 onMouseUp={handleResize}
+                onTouchEnd={handleResize}
                 className="w-full"
               />
             </div>
