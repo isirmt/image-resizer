@@ -14,3 +14,12 @@
 ## リンク
 
 https://img-sm.isirmt.com/
+
+## Developについて
+
+以下をルートディレクトリで実行します．
+
+```bash
+npm i
+npm run develop
+```
