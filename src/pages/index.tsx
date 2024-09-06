@@ -205,7 +205,8 @@ export default function App() {
       <div className="h-48 px-4 bg-red-50 flex flex-col items-center justify-center">
         <input
           onChange={handleInput}
-          type="file" accept="image/*" />
+          type="file" accept="image/*"
+          className="mb-1 relative m-0 block min-w-0 cursor-pointer rounded border border-solid border-red-300 bg-transparent bg-clip-padding px-3 py-0.5 text-red-400 font-bold file:-mx-3 file:-my-1 file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:text-red-400 file:border-solid file:border-inherit file:bg-red-100 file:px-3 file:py-0.5 focus:outline-none file:focus:bg-red-200" />
         {loadedImgSize ? (
           <>
             <div className="flex gap-2 text-sm text-red-400">
@@ -222,7 +223,7 @@ export default function App() {
                 onChange={(e) => setSliderValue(Number(e.target.value))}
                 onMouseUp={handleResize}
                 onTouchEnd={handleResize}
-                className="w-full"
+                className="transparent h-[4px] w-full cursor-pointer appearance-none border-transparent bg-red-200"
               />
             </div>
             <div className="flex gap-2 text-sm text-red-400">
@@ -242,13 +243,16 @@ export default function App() {
                 <option value="image/jpeg">JPEG</option>
               </select>
             </div>
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="transition-colors mt-4 px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500"
-            >
-              <b>ダウンロード</b>
-            </button>
+            <div className="mt-2 flex gap-2 items-center justify-center">
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="transition-colors px-4 py-2 bg-red-400 text-white rounded-lg hover:bg-red-500"
+              >
+                <b>ダウンロード</b>
+              </button>
+              <div className=" text-sm text-red-400"><b>コピー<br />[Ctrl(Cmd)+C]</b></div>
+            </div>
           </>
         ) : <></>}
       </div>
