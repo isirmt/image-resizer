@@ -24,38 +24,91 @@ export default function App() {
   const [resizedFileSize, setResizedFileSize] = React.useState<number | null>(null);
   const [outputFormat, setOutputFormat] = React.useState<"image/png" | "image/jpeg">("image/png");
 
-  const loadImg = (files: FileList) => {
+  React.useEffect(() => {
+    const handlePaste = (event: ClipboardEvent) => {
+      const items = Array.from(event.clipboardData?.items || []);
+      for (const item of items) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            loadImg(file);
+          }
+        }
+      }
+    };
+
+    const handleCopy = async (event: ClipboardEvent) => {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            const item = new ClipboardItem({ [blob.type]: blob });
+            await navigator.clipboard.write([item]);
+            console.log("copied to clipboard!");
+          }
+        }, outputFormat, outputFormat === "image/jpeg" ? 0.9 : undefined);
+        event.preventDefault();
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === "v") {
+        event.preventDefault();
+        navigator.clipboard.read().then(items => {
+          for (const item of items) {
+            if (item.types.includes("image/png") || item.types.includes("image/jpeg")) {
+              item.getType("image/png").then((blob) => {
+                const file = new File([blob], "from-clipboard-image.png", { type: blob.type });
+                loadImg(file);
+              });
+            }
+          }
+        });
+      }
+
+      if (event.ctrlKey && event.key === "c") {
+        handleCopy(new ClipboardEvent("copy"));
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("paste", handlePaste);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("paste", handlePaste);
+    };
+  }, [outputFormat]);
+
+  const loadImg = (file: File) => {
     const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        if (files.length > 0) {
-          const img = new Image();
-          img.onload = () => {
-            const { width: imgWidth, height: imgHeight } = img;
-            setLoadedImgSize({ width: imgWidth, height: imgHeight });
+        const img = new Image();
+        img.onload = () => {
+          const { width: imgWidth, height: imgHeight } = img;
+          setLoadedImgSize({ width: imgWidth, height: imgHeight });
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const aspectRatio = imgWidth / imgHeight;
-            setLoadedAspectRatio(aspectRatio);
-            const fileHeight = canvas.width / aspectRatio;
+          const aspectRatio = imgWidth / imgHeight;
+          setLoadedAspectRatio(aspectRatio);
+          const fileHeight = canvas.width / aspectRatio;
 
-            if (fileHeight > canvas.height) {
-              const drawHeight = canvas.height;
-              const drawWidth = canvas.height * aspectRatio;
-              ctx.drawImage(img, (canvas.width - drawWidth) / 2, 0, drawWidth, drawHeight);
-            } else {
-              const drawWidth = canvas.width;
-              const drawHeight = canvas.width / aspectRatio;
-              ctx.drawImage(img, 0, (canvas.height - drawHeight) / 2, drawWidth, drawHeight);
-            }
+          if (fileHeight > canvas.height) {
+            const drawHeight = canvas.height;
+            const drawWidth = canvas.height * aspectRatio;
+            ctx.drawImage(img, (canvas.width - drawWidth) / 2, 0, drawWidth, drawHeight);
+          } else {
+            const drawWidth = canvas.width;
+            const drawHeight = canvas.width / aspectRatio;
+            ctx.drawImage(img, 0, (canvas.height - drawHeight) / 2, drawWidth, drawHeight);
+          }
 
-            setSliderValue(imgWidth);
-          };
-          img.src = URL.createObjectURL(files[0]);
-          setCurrentFile(files[0]);
-        }
+          setSliderValue(imgWidth);
+        };
+        img.src = URL.createObjectURL(file);
+        setCurrentFile(file);
         setIsDragging(false);
       }
     }
@@ -63,13 +116,13 @@ export default function App() {
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    loadImg(event.dataTransfer.files);
+    loadImg(event.dataTransfer.files[0]);
   };
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.currentTarget.files;
     if (!files || files?.length === 0) return;
-    loadImg(files);
+    loadImg(files[0]);
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -90,11 +143,9 @@ export default function App() {
         const ctx = canvas.getContext("2d");
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // Adjust output format (PNG or JPEG)
-        const quality = outputFormat === "image/jpeg" ? 0.2 : undefined; // Adjust quality for JPEG
+        const quality = outputFormat === "image/jpeg" ? 0.9 : undefined;
         const resizedImgData = canvas.toDataURL(outputFormat, quality);
 
-        // Calculate the size of the resized image data URL
         const base64Length = resizedImgData.length - (resizedImgData.indexOf(",") + 1);
         const padding = resizedImgData.endsWith("==") ? 2 : resizedImgData.endsWith("=") ? 1 : 0;
         const fileSizeInBytes = base64Length * 0.75 - padding;
@@ -145,7 +196,7 @@ export default function App() {
           {!currentFile
             ? <>
               <img className="max-w-full max-h-full" src="/back_transparent.png" alt="icon"></img>
-              <p className="text-red-400 text-center text-lg"><b>画像をドラッグ&ドロップ<br />または下より選択</b></p>
+              <p className="text-red-400 text-center text-lg"><b>画像をドラッグ&ドロップ<br />または下より選択<br />または&nbsp;貼り付け[Ctrl(Cmd)+V]</b></p>
             </>
             : <></>}
         </div>
@@ -203,7 +254,7 @@ export default function App() {
       </div>
     </main>
   );
-}
+};
 
 export const Head: HeadFC = () => {
   return <>
