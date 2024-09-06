@@ -22,6 +22,7 @@ export default function App() {
   const [sliderValue, setSliderValue] = React.useState<number>(0);
   const [currentFile, setCurrentFile] = React.useState<File | null>(null);
   const [resizedFileSize, setResizedFileSize] = React.useState<number | null>(null);
+  const [outputFormat, setOutputFormat] = React.useState<"image/png" | "image/jpeg">("image/png");
 
   const loadImg = (files: FileList) => {
     const canvas = canvasRef.current;
@@ -58,7 +59,7 @@ export default function App() {
         setIsDragging(false);
       }
     }
-  }
+  };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -68,8 +69,8 @@ export default function App() {
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.currentTarget.files;
     if (!files || files?.length === 0) return;
-    loadImg(files)
-  }
+    loadImg(files);
+  };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -88,12 +89,15 @@ export default function App() {
         canvas.height = sliderValue / loadedAspectRatio;
         const ctx = canvas.getContext("2d");
         ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const resizedImgData = canvas.toDataURL("image/png");
+
+        // Adjust output format (PNG or JPEG)
+        const quality = outputFormat === "image/jpeg" ? 0.2 : undefined; // Adjust quality for JPEG
+        const resizedImgData = canvas.toDataURL(outputFormat, quality);
 
         // Calculate the size of the resized image data URL
-        const base64Length = resizedImgData.length - (resizedImgData.indexOf(',') + 1);
-        const padding = (resizedImgData.endsWith('==')) ? 2 : (resizedImgData.endsWith('=')) ? 1 : 0;
-        const fileSizeInBytes = (base64Length * 0.75) - padding;
+        const base64Length = resizedImgData.length - (resizedImgData.indexOf(",") + 1);
+        const padding = resizedImgData.endsWith("==") ? 2 : resizedImgData.endsWith("=") ? 1 : 0;
+        const fileSizeInBytes = base64Length * 0.75 - padding;
 
         setResizedFileSize(fileSizeInBytes);
 
@@ -115,8 +119,9 @@ export default function App() {
     const canvas = canvasRef.current;
     if (canvas) {
       const link = document.createElement("a");
-      link.download = `${currentFile?.name}_(${sliderValue}x${Math.trunc(sliderValue / loadedAspectRatio!)})_resized.png`;
-      link.href = canvas.toDataURL();
+      const formatExtension = outputFormat === "image/jpeg" ? "jpg" : "png";
+      link.download = `${currentFile?.name}_(${sliderValue}x${Math.trunc(sliderValue / loadedAspectRatio!)})_resized.${formatExtension}`;
+      link.href = canvas.toDataURL(outputFormat, outputFormat === "image/jpeg" ? 0.9 : undefined);
       link.click();
     }
   };
@@ -174,6 +179,18 @@ export default function App() {
               {resizedFileSize && <span><b>ファイルサイズ：{formatFileSize(resizedFileSize)}</b></span>}
               <span><b>画像サイズ：[{sliderValue} x {Math.trunc(sliderValue / loadedAspectRatio!)}]</b></span>
             </div>
+            <div className="flex gap-2 text-sm text-red-400">
+              <label htmlFor="format-select"><b>出力形式</b></label>
+              <select
+                id="format-select"
+                value={outputFormat}
+                onChange={(e) => setOutputFormat(e.target.value as "image/png" | "image/jpeg")}
+                className="border rounded"
+              >
+                <option value="image/png">PNG</option>
+                <option value="image/jpeg">JPEG</option>
+              </select>
+            </div>
             <button
               type="button"
               onClick={handleDownload}
@@ -184,7 +201,6 @@ export default function App() {
           </>
         ) : <></>}
       </div>
-
     </main>
   );
 }
