@@ -206,7 +206,7 @@ export default function App() {
         <input
           onChange={handleInput}
           type="file" accept="image/*"
-          className="mb-1 relative m-0 block min-w-0 cursor-pointer rounded border border-solid border-red-300 bg-transparent bg-clip-padding px-3 py-0.5 text-red-400 font-bold file:-mx-3 file:-my-1 file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:text-red-400 file:border-solid file:border-inherit file:bg-red-100 file:px-3 file:py-0.5 focus:outline-none file:focus:bg-red-200" />
+          className="w-[85%] mb-1 relative m-0 block min-w-0 cursor-pointer rounded border border-solid border-red-300 bg-transparent bg-clip-padding px-3 py-0.5 text-red-400 font-bold file:-mx-3 file:-my-1 file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:text-red-400 file:border-solid file:border-inherit file:bg-red-100 file:px-3 file:py-0.5 focus:outline-none file:focus:bg-red-200" />
         {loadedImgSize ? (
           <>
             <div className="flex gap-2 text-sm text-red-400">
