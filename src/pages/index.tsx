@@ -185,7 +185,7 @@ export default function App() {
         </h1>
         <p className="leading-4"><small>&copy; isirmt</small></p>
       </div>
-      <div className="h-[calc(100svh_-_16rem)] flex flex-col justify-center items-center gap-y-3 relative w-full">
+      <div className="h-[calc(100svh_-_16rem_-_env(safe-area-inset-bottom))] flex flex-col justify-center items-center gap-y-3 relative w-full">
         <div
           className={`w-full h-full flex flex-col justify-center items-center p-6 border-red-400 border-y mx-4 ${isDragging ? "bg-red-50" : ""}`}
           onDrop={handleDrop}
@@ -202,7 +202,7 @@ export default function App() {
         </div>
       </div>
 
-      <div className="h-48 px-4 bg-red-50 flex flex-col items-center justify-center">
+      <div className="h-48 px-4 pb-[env(safe-area-inset-bottom)] bg-red-50 flex flex-col items-center justify-center">
         <input
           onChange={handleInput}
           type="file" accept="image/*"
